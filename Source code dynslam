@@ -3,14 +3,11 @@ videoReader = VideoReader('dataset_video.mp4');  % Ganti dengan file video Anda
 frameRate = videoReader.FrameRate;
 frameCount = floor(videoReader.Duration * frameRate);
 
-
 opticFlow = opticalFlowLK('NoiseThreshold', 0.01);
-
 
 prevFrame = [];
 features = [];
 frameID = 0;
-
 
 figure;
 hold on;
@@ -33,17 +30,14 @@ while hasFrame(videoReader)
        
         dynamicRegions = flow.Magnitude > 1;  % Threshold untuk mendeteksi pergerakan
 
-        
         imshow(currentFrame);
         hold on;
         plot(flow, 'DecimationFactor', [5, 5]);
         hold off;
         drawnow;
         
-        
         points = detectORBFeatures(grayFrame);
-        [features, validPoints] = extractFeatures(grayFrame, points);
-        
+        [features, validPoints] = extractFeatures(grayFrame, points); 
        
         if ~isempty(features)
             newPoints = validPoints.Location;
@@ -51,9 +45,5 @@ while hasFrame(videoReader)
         end
     end
     
-   
     prevFrame = grayFrame;
 end
-
-
-disp('Selesai dengan pemrosesan SLAM!');
