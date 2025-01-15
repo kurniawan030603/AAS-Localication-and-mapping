@@ -1,0 +1,59 @@
+clear; clc;
+videoReader = VideoReader('dataset_video.mp4');  % Ganti dengan file video Anda
+frameRate = videoReader.FrameRate;
+frameCount = floor(videoReader.Duration * frameRate);
+
+
+opticFlow = opticalFlowLK('NoiseThreshold', 0.01);
+
+
+prevFrame = [];
+features = [];
+frameID = 0;
+
+
+figure;
+hold on;
+
+while hasFrame(videoReader)
+    frameID = frameID + 1;
+    currentFrame = readFrame(videoReader);
+    
+    
+    grayFrame = rgb2gray(currentFrame);
+    
+    
+    if frameID == 1
+        prevFrame = grayFrame;
+        points = detectORBFeatures(prevFrame);  % ORB Detektor untuk deteksi fitur
+        [features, validPoints] = extractFeatures(prevFrame, points);
+    else
+        flow = estimateFlow(opticFlow, grayFrame);
+        
+       
+        dynamicRegions = flow.Magnitude > 1;  % Threshold untuk mendeteksi pergerakan
+
+        
+        imshow(currentFrame);
+        hold on;
+        plot(flow, 'DecimationFactor', [5, 5]);
+        hold off;
+        drawnow;
+        
+        
+        points = detectORBFeatures(grayFrame);
+        [features, validPoints] = extractFeatures(grayFrame, points);
+        
+       
+        if ~isempty(features)
+            newPoints = validPoints.Location;
+            plot(newPoints(:,1), newPoints(:,2), 'ro');  % Visualisasi fitur yang terdeteksi
+        end
+    end
+    
+   
+    prevFrame = grayFrame;
+end
+
+
+disp('Selesai dengan pemrosesan SLAM!');
